@@ -1,9 +1,6 @@
-import type { PushRequestBody } from '../types/notification';
+import type { DevicePlatform, PushRequestBody } from '../types/notification';
 import { AppError } from '../utils/authErrors';
-import { auth } from './firebase';
-
-const REQUEST_TIMEOUT_MS = 10000;
-const MAX_ATTEMPTS = 2;
+import { ApiError, apiRequest } from './apiClient';
 
 /**
  * Pede à API que notifique os destinatários de uma mensagem já gravada.
@@ -11,36 +8,29 @@ const MAX_ATTEMPTS = 2;
  * os destinatários sozinha. Como o endpoint é idempotente por mensagem, repetir a chamada é seguro.
  */
 export async function requestPushForMessage(conversationId: string, messageId: string): Promise<void> {
-  const baseUrl = process.env.EXPO_PUBLIC_API_URL;
-  if (!baseUrl) throw new AppError('O serviço de notificações não está configurado.');
-
-  const user = auth.currentUser;
-  if (!user) throw new AppError('Sessão expirada. Faça login novamente.');
-
-  const idToken = await user.getIdToken();
   const body: PushRequestBody = { conversationId, messageId };
-  const url = `${baseUrl.replace(/\/+$/, '')}/notifications/messages`;
-
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify(body),
-        signal: controller.signal,
-      });
-      if (response.ok) return;
-      // Erros 4xx não melhoram com nova tentativa.
-      if (response.status < 500) throw new AppError('A notificação desta mensagem foi recusada pelo servidor.');
-    } catch (error) {
-      if (error instanceof AppError) throw error;
-      // Falha de rede ou timeout: tenta de novo até o limite.
-    } finally {
-      clearTimeout(timeout);
+  try {
+    await apiRequest('POST', '/notifications/messages', body);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw new AppError(
+        error.status >= 400 && error.status < 500
+          ? 'A notificação desta mensagem foi recusada pelo servidor.'
+          : 'Não foi possível entregar a notificação desta mensagem.',
+      );
     }
+    throw error;
   }
+}
 
-  throw new AppError('Não foi possível entregar a notificação desta mensagem.');
+/**
+ * Registra o aparelho pela API, que grava o token no usuário autenticado e o remove de qualquer outra
+ * conta (um aparelho que troca de usuário não pode continuar recebendo as notificações do anterior).
+ */
+export async function registerDeviceViaApi(
+  deviceId: string,
+  token: string,
+  platform: DevicePlatform,
+): Promise<void> {
+  await apiRequest('POST', '/devices', { deviceId, token, platform });
 }

@@ -9,6 +9,7 @@ import { parseNotificationPayload } from '../utils/notificationPayload';
 import { isRecord, readString } from '../utils/parsers';
 import { deviceTokenConverter } from './converters';
 import { firestore } from './firebase';
+import { registerDeviceViaApi } from './pushApi';
 
 /** Canal Android; a API informa o mesmo ID no payload do FCM. */
 export const MESSAGES_CHANNEL_ID = 'messages';
@@ -71,16 +72,23 @@ async function fetchPushToken(): Promise<string | null> {
   return token.data.length > 0 ? token.data : null;
 }
 
+/**
+ * Grava o token do aparelho. O caminho preferido é a API, que também retira o mesmo token de outras contas;
+ * se ela estiver indisponível, grava direto no Firestore (as regras permitem apenas o próprio usuário).
+ */
 export async function saveDeviceToken(uid: string, token: string): Promise<void> {
   const deviceId = await getInstallationId();
+  const platform = currentPlatform();
+
+  try {
+    await registerDeviceViaApi(deviceId, token, platform);
+    return;
+  } catch {
+    // Cai para a gravação direta abaixo.
+  }
+
   const ref = doc(firestore, 'users', uid, 'devices', deviceId).withConverter(deviceTokenConverter);
-  await setDoc(ref, {
-    deviceId,
-    token,
-    platform: currentPlatform(),
-    enabled: true,
-    updatedAt: Date.now(),
-  });
+  await setDoc(ref, { deviceId, token, platform, enabled: true, updatedAt: Date.now() });
 }
 
 /**

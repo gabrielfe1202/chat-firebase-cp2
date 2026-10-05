@@ -9,6 +9,8 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import type { ChatUser, PublicProfile } from '../types/user';
+import { isRecord, readNumber, readString } from '../utils/parsers';
+import { ApiError, apiRequest } from './apiClient';
 import { publicProfileConverter, userConverter } from './converters';
 import { firestore } from './firebase';
 
@@ -24,10 +26,43 @@ export async function saveUserProfile(user: ChatUser): Promise<void> {
   await batch.commit();
 }
 
-/** Perfil completo; só é legível para o próprio usuário ou para quem compartilha conversa/grupo. */
+function isPermissionDenied(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'permission-denied';
+}
+
+/** Perfil completo via API, que confere o vínculo (conversa individual ou grupo em comum) nos dois bancos. */
+async function getProfileViaApi(uid: string): Promise<ChatUser | null> {
+  try {
+    const data = await apiRequest('GET', `/users/${encodeURIComponent(uid)}/profile`);
+    if (!isRecord(data)) return null;
+    return {
+      uid,
+      name: readString(data.name),
+      email: readString(data.email),
+      phoneNumber: readString(data.phoneNumber),
+      birthDate: readString(data.birthDate),
+      photoUrl: readString(data.photoUrl),
+      createdAt: readNumber(data.createdAt),
+    };
+  } catch (error) {
+    // 403/404: sem vínculo ou perfil inexistente — a tela mostra "perfil indisponível".
+    if (error instanceof ApiError && (error.status === 403 || error.status === 404)) return null;
+    throw error;
+  }
+}
+
+/**
+ * Perfil completo. O Firestore libera o próprio perfil e o de quem tem conversa individual conosco;
+ * para colegas de grupo as regras não conseguem provar o vínculo, então a consulta passa pela API.
+ */
 export async function getUserProfile(uid: string): Promise<ChatUser | null> {
-  const snapshot = await getDoc(userRef(uid));
-  return snapshot.exists() ? snapshot.data() : null;
+  try {
+    const snapshot = await getDoc(userRef(uid));
+    return snapshot.exists() ? snapshot.data() : null;
+  } catch (error) {
+    if (isPermissionDenied(error)) return getProfileViaApi(uid);
+    throw error;
+  }
 }
 
 export async function getPublicProfile(uid: string): Promise<PublicProfile | null> {
