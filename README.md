@@ -17,7 +17,6 @@ O envio das notificações é feito por uma **API própria**, publicada na Verce
 
 | Item | Valor |
 |---|---|
-| Repositório | <https://github.com/gabrielfe1202/chat-firebase-cp2> (privado: adicione o professor como colaborador ou torne-o público) |
 | API publicada | <https://chat-firebase-api.vercel.app> |
 | Health check | `GET <URL da API>/health` → `{"status":"ok","timestamp":...}` |
 
