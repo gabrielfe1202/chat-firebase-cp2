@@ -23,11 +23,19 @@
       },
       "predictiveBackGestureEnabled": false
     },
-    "web": { "favicon": "./assets/favicon.png" },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
     "plugins": [
       "expo-build-properties",
       "expo-notifications",
-      ["expo-image-picker", { "photosPermission": "Permite escolher a foto de perfil e do grupo." }]
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permite escolher a foto de perfil e do grupo."
+        }
+      ],
+      "expo-status-bar"
     ]
   }
 }
