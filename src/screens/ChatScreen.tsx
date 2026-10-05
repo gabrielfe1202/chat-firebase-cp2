@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '../components/Avatar';
 import { ChatInput } from '../components/ChatInput';
@@ -11,6 +11,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useChat } from '../hooks/useChat';
 import { useConversation } from '../hooks/useConversation';
 import { useUsers } from '../hooks/useUsers';
+import { setActiveConversationId } from '../services/notificationService';
 import { colors } from '../theme';
 import type { ChatMessage, MessageTarget } from '../types/chat';
 import type { RootScreenProps } from '../types/navigation';
@@ -27,6 +28,12 @@ export function ChatScreen({ navigation, route }: RootScreenProps<'Chat'>) {
   const { byUid } = useUsers();
   const info = useConversation(conversationId, conversationType, myUid, byUid);
   const chat = useChat(conversationId, conversationType, myUid, info.status === 'ready');
+
+  // Enquanto esta conversa está aberta, notificações dela não aparecem como banner.
+  useEffect(() => {
+    setActiveConversationId(conversationId);
+    return () => setActiveConversationId(null);
+  }, [conversationId]);
 
   const [draft, setDraft] = useState('');
   const [recipientId, setRecipientId] = useState<string | null>(null);
@@ -150,6 +157,15 @@ export function ChatScreen({ navigation, route }: RootScreenProps<'Chat'>) {
         </Pressable>
       ) : null}
 
+      {chat.pushError ? (
+        <Pressable style={styles.banner} onPress={chat.dismissPushError} accessibilityRole="button">
+          <Text style={styles.pushNotice}>
+            Mensagem enviada, mas {chat.pushError.charAt(0).toLowerCase()}
+            {chat.pushError.slice(1)} Toque para fechar.
+          </Text>
+        </Pressable>
+      ) : null}
+
       {isGroup ? (
         <RecipientPicker members={mentionableMembers} selectedId={recipientId} onSelect={setRecipientId} />
       ) : null}
@@ -166,4 +182,5 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   title: { fontSize: 17, fontWeight: '600', color: colors.text, maxWidth: 220 },
   empty: { color: colors.textMuted, textAlign: 'center' },
+  pushNotice: { color: colors.textMuted, fontSize: 12, textAlign: 'center' },
 });

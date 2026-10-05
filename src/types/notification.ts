@@ -39,3 +39,13 @@ export type PushRequestBody = {
   conversationId: string;
   messageId: string;
 };
+
+export type PushUnavailableReason = 'not-a-device' | 'no-token' | 'error';
+
+/** Resultado do registro do aparelho para receber push. */
+export type PushRegistrationResult =
+  | { status: 'registered' }
+  | { status: 'denied'; canAskAgain: boolean }
+  | { status: 'unavailable'; reason: PushUnavailableReason };
+
+export type PushState = PushRegistrationResult | { status: 'idle' } | { status: 'registering' };

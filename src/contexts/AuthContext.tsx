@@ -1,6 +1,7 @@
 import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { User } from 'firebase/auth';
 import * as authService from '../services/authService';
+import { unregisterDevice } from '../services/notificationService';
 import { observeUserProfile } from '../services/userService';
 import type { LoginInput, RegisterInput, ChatUser } from '../types/user';
 
@@ -52,7 +53,12 @@ export function AuthProvider({ children }: Props) {
 
   const signIn = useCallback((input: LoginInput) => authService.login(input), []);
   const signUp = useCallback((input: RegisterInput) => authService.register(input), []);
-  const signOut = useCallback(() => authService.logout(), []);
+  const signOut = useCallback(async () => {
+    // Antes de encerrar a sessão (ainda com permissão), remove o token deste aparelho para que
+    // o usuário que saiu não continue recebendo push aqui. Falha de rede não impede o logout.
+    if (uid) await unregisterDevice(uid).catch(() => undefined);
+    await authService.logout();
+  }, [uid]);
 
   const status: AuthStatus = useMemo(() => {
     if (!sessionResolved) return 'loading';

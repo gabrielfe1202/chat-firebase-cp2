@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { listenMessages, sendMessage } from '../services/chatService';
+import { requestPushForMessage } from '../services/pushApi';
 import type { ChatMessage, ConversationType, MessageTarget } from '../types/chat';
 import { getErrorMessage } from '../utils/authErrors';
 
@@ -11,6 +12,9 @@ type ChatState = {
 
 type UseChatResult = ChatState & {
   sendError: string | null;
+  /** A mensagem foi gravada, mas a API não conseguiu disparar a notificação. */
+  pushError: string | null;
+  dismissPushError: () => void;
   /** Envia a mensagem; devolve false quando a gravação falha (o erro fica em `sendError`). */
   send: (text: string, target: MessageTarget, mentionedUserIds: string[]) => Promise<boolean>;
   dismissSendError: () => void;
@@ -28,11 +32,13 @@ export function useChat(
 ): UseChatResult {
   const [state, setState] = useState<ChatState>({ messages: [], loading: true, error: null });
   const [sendError, setSendError] = useState<string | null>(null);
+  const [pushError, setPushError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!enabled) return undefined;
     setState({ messages: [], loading: true, error: null });
     setSendError(null);
+    setPushError(null);
 
     return listenMessages(
       conversationId,
@@ -45,7 +51,7 @@ export function useChat(
     async (text: string, target: MessageTarget, mentionedUserIds: string[]): Promise<boolean> => {
       setSendError(null);
       try {
-        await sendMessage({
+        const messageId = await sendMessage({
           conversationId,
           conversationType,
           senderId: myUid,
@@ -53,6 +59,12 @@ export function useChat(
           target,
           mentionedUserIds,
         });
+
+        // Só depois de persistida a mensagem a API é acionada. Falha no push não desfaz o envio.
+        setPushError(null);
+        requestPushForMessage(conversationId, messageId).catch((error: unknown) =>
+          setPushError(getErrorMessage(error)),
+        );
         return true;
       } catch (error) {
         setSendError(getErrorMessage(error));
@@ -63,6 +75,7 @@ export function useChat(
   );
 
   const dismissSendError = useCallback(() => setSendError(null), []);
+  const dismissPushError = useCallback(() => setPushError(null), []);
 
-  return { ...state, sendError, send, dismissSendError };
+  return { ...state, sendError, pushError, send, dismissSendError, dismissPushError };
 }

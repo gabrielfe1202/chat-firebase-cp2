@@ -3,9 +3,12 @@ import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import { ConversationItem } from '../components/ConversationItem';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { Loading } from '../components/Loading';
+import { NotificationNotice } from '../components/NotificationNotice';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useAuth } from '../hooks/useAuth';
 import { useConversations } from '../hooks/useConversations';
+import { useNotificationNavigation } from '../hooks/useNotificationNavigation';
+import { useNotifications } from '../hooks/useNotifications';
 import { useUsers } from '../hooks/useUsers';
 import { colors } from '../theme';
 import type { ConversationSummary } from '../types/chat';
@@ -17,6 +20,8 @@ export function ConversationsScreen({ navigation }: RootScreenProps<'Conversatio
   const myUid = profile?.uid ?? '';
   const { byUid } = useUsers();
   const { conversations, loading, error } = useConversations(myUid, byUid);
+  const { state: pushState, retry: retryPush, openSettings } = useNotifications(myUid);
+  useNotificationNavigation(navigation);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -56,6 +61,7 @@ export function ConversationsScreen({ navigation }: RootScreenProps<'Conversatio
 
   return (
     <View style={styles.container}>
+      <NotificationNotice state={pushState} onRetry={retryPush} onOpenSettings={openSettings} />
       <View style={styles.messages}>
         <ErrorMessage message={error} />
       </View>
