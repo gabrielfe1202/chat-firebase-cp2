@@ -35,6 +35,12 @@
         }
       ],
       "expo-status-bar"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "1eb73f6b-0bd5-43f0-9cc2-aa1916062251"
+      }
+    },
+    "owner": "gabrielfe1202"
   }
 }
