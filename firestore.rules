@@ -1,0 +1,159 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Funções auxiliares ----------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function textBetween(value, min, max) {
+      return value is string && value.size() >= min && value.size() <= max;
+    }
+
+    // ID determinístico da conversa individual: os dois uids ordenados, separados por "_".
+    function pairId(a, b) {
+      return a < b ? a + '_' + b : b + '_' + a;
+    }
+
+    // Verdadeiro quando o usuário logado e `uid` compartilham uma conversa individual.
+    // A regra de criação de directConversations garante que o ID só existe para o par real.
+    function hasDirectConversationWith(uid) {
+      return isSignedIn()
+        && uid != request.auth.uid
+        && exists(/databases/$(database)/documents/directConversations/$(pairId(request.auth.uid, uid)));
+    }
+
+    function policyIsValid(policy) {
+      return policy in ['all_group_messages', 'mentioned_members', 'direct_messages_only', 'disabled'];
+    }
+
+    // ---------- publicProfiles: nome e foto, visíveis a qualquer usuário autenticado ----------
+
+    match /publicProfiles/{uid} {
+      allow read: if isSignedIn();
+      allow create, update: if isSelf(uid)
+        && request.resource.data.keys().hasOnly(['name', 'photoUrl'])
+        && request.resource.data.keys().hasAll(['name', 'photoUrl'])
+        && textBetween(request.resource.data.name, 1, 80)
+        && textBetween(request.resource.data.photoUrl, 0, 500);
+      allow delete: if false;
+    }
+
+    // ---------- users: dados cadastrais (restritos) ----------
+
+    function validUser(data) {
+      return data.keys().hasOnly(['name', 'email', 'phoneNumber', 'birthDate', 'photoUrl', 'createdAt'])
+        && data.keys().hasAll(['name', 'email', 'phoneNumber', 'birthDate', 'photoUrl', 'createdAt'])
+        && textBetween(data.name, 1, 80)
+        && data.email == request.auth.token.email
+        && textBetween(data.phoneNumber, 0, 15)
+        && textBetween(data.birthDate, 0, 10)
+        && textBetween(data.photoUrl, 0, 500)
+        && data.createdAt is number;
+    }
+
+    match /users/{uid} {
+      // O próprio usuário, ou quem tem conversa individual com ele.
+      // Colegas de grupo acessam o perfil pela API (Admin SDK), que valida o vínculo cruzando os serviços.
+      allow read: if isSelf(uid) || hasDirectConversationWith(uid);
+      allow create: if isSelf(uid) && validUser(request.resource.data);
+      allow update: if isSelf(uid)
+        && validUser(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if false;
+
+      // Tokens de dispositivo: somente o dono lê e grava. A API os lê com o Admin SDK.
+      match /devices/{deviceId} {
+        allow read, delete: if isSelf(uid);
+        allow create, update: if isSelf(uid)
+          && request.resource.data.keys().hasOnly(['token', 'platform', 'enabled', 'updatedAt'])
+          && request.resource.data.keys().hasAll(['token', 'platform', 'enabled', 'updatedAt'])
+          && textBetween(request.resource.data.token, 1, 500)
+          && request.resource.data.platform in ['android', 'ios']
+          && request.resource.data.enabled is bool
+          && request.resource.data.updatedAt is number;
+      }
+    }
+
+    // ---------- directConversations ----------
+
+    function validDirectConversation(conversationId, data) {
+      return data.keys().hasOnly(['participantIds', 'createdAt'])
+        && data.keys().hasAll(['participantIds', 'createdAt'])
+        && data.participantIds is list
+        && data.participantIds.size() == 2
+        && data.participantIds[0] < data.participantIds[1]
+        && conversationId == data.participantIds[0] + '_' + data.participantIds[1]
+        && request.auth.uid in data.participantIds
+        && data.createdAt is number;
+    }
+
+    match /directConversations/{conversationId} {
+      // `get` aceita documento inexistente (a transação de criação lê antes de gravar).
+      allow get: if isSignedIn()
+        && (resource == null || request.auth.uid in resource.data.participantIds);
+      allow list: if isSignedIn() && request.auth.uid in resource.data.participantIds;
+      allow create: if isSignedIn() && validDirectConversation(conversationId, request.resource.data);
+      allow update, delete: if false;
+    }
+
+    // ---------- groups ----------
+
+    function validGroup(data) {
+      return data.keys().hasOnly([
+          'name', 'photoUrl', 'ownerId', 'memberIds', 'memberLimit',
+          'notificationPolicy', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasAll([
+          'name', 'photoUrl', 'ownerId', 'memberIds', 'memberLimit',
+          'notificationPolicy', 'createdAt', 'updatedAt'
+        ])
+        && textBetween(data.name, 1, 40)
+        && textBetween(data.photoUrl, 0, 500)
+        && data.memberLimit is int
+        && data.memberLimit >= 2
+        && data.memberLimit <= 50
+        && data.memberIds is list
+        && data.memberIds.toSet().size() == data.memberIds.size()   // sem integrantes repetidos
+        && data.memberIds.size() >= 2
+        && data.memberIds.size() <= data.memberLimit                // LIMITE DE INTEGRANTES
+        && data.ownerId in data.memberIds
+        && policyIsValid(data.notificationPolicy)
+        && data.createdAt is number
+        && data.updatedAt is number;
+    }
+
+    match /groups/{groupId} {
+      // Somente integrantes ativos leem. `get` aceita documento inexistente.
+      allow get: if isSignedIn()
+        && (resource == null || request.auth.uid in resource.data.memberIds);
+      allow list: if isSignedIn() && request.auth.uid in resource.data.memberIds;
+
+      allow create: if isSignedIn()
+        && validGroup(request.resource.data)
+        && request.resource.data.ownerId == request.auth.uid;
+
+      // Somente o proprietário altera o grupo; dono e data de criação são imutáveis.
+      // O limite é revalidado a cada gravação, inclusive em tentativas concorrentes de entrada.
+      allow update: if isSignedIn()
+        && resource.data.ownerId == request.auth.uid
+        && validGroup(request.resource.data)
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.createdAt == resource.data.createdAt;
+
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Tudo que não foi liberado acima (ex.: logs de notificação da API) é negado ao cliente.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

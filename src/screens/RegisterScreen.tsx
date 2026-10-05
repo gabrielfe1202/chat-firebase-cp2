@@ -11,6 +11,7 @@ import type { RootScreenProps } from '../types/navigation';
 import { getErrorMessage } from '../utils/authErrors';
 import type { ValidationResult } from '../utils/groupValidation';
 import {
+  MAX_NAME_LENGTH,
   maskBirthDate,
   maskPhone,
   validateBirthDate,
@@ -111,7 +112,7 @@ export function RegisterScreen({ navigation }: RootScreenProps<'Register'>) {
         </Pressable>
 
         <View style={styles.form}>
-          <FormInput label="Nome" value={form.name} onChangeText={setField('name')} autoComplete="name" error={visibleError('name')} />
+          <FormInput label="Nome" value={form.name} onChangeText={setField('name')} autoComplete="name" maxLength={MAX_NAME_LENGTH} error={visibleError('name')} />
           <FormInput
             label="E-mail"
             value={form.email}

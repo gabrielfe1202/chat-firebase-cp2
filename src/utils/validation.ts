@@ -6,8 +6,13 @@ const fail = (message: string): ValidationResult => ({ ok: false, message });
 export const MIN_PASSWORD_LENGTH = 6;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+export const MAX_NAME_LENGTH = 80;
+
 export function validateName(name: string): ValidationResult {
-  return name.trim().length >= 2 ? ok : fail('Informe seu nome completo.');
+  const length = name.trim().length;
+  if (length < 2) return fail('Informe seu nome completo.');
+  if (length > MAX_NAME_LENGTH) return fail(`O nome deve ter no máximo ${MAX_NAME_LENGTH} caracteres.`);
+  return ok;
 }
 
 export function validateEmail(email: string): ValidationResult {

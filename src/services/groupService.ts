@@ -15,6 +15,7 @@ import type { ChatGroup, CreateGroupInput, GroupSettingsUpdate } from '../types/
 import { NOTIFICATION_POLICIES } from '../types/notification';
 import { AppError } from '../utils/authErrors';
 import {
+  MIN_GROUP_MEMBERS,
   canAddMember,
   isGroupOwner,
   validateGroupCreation,
@@ -113,9 +114,11 @@ export async function createGroup(ownerId: string, input: CreateGroupInput): Pro
   await setDoc(newGroupRef, group);
 
   try {
-    const paths: Record<string, boolean | string> = { [ownerPath(group.id)]: ownerId };
-    for (const uid of memberIds) paths[memberPath(group.id, uid)] = true;
-    await update(ref(realtimeDb), paths);
+    // Em duas etapas: as regras do RTDB só aceitam gravar `members/` depois que `groupMeta/` existe.
+    await update(ref(realtimeDb), { [ownerPath(group.id)]: ownerId });
+    const memberPaths: Record<string, boolean> = {};
+    for (const uid of memberIds) memberPaths[memberPath(group.id, uid)] = true;
+    await update(ref(realtimeDb), memberPaths);
   } catch (error) {
     // Sem o espelho ninguém conseguiria ler as mensagens; desfaz para não deixar um grupo inutilizável.
     await deleteDoc(newGroupRef).catch(() => undefined);
@@ -154,6 +157,9 @@ async function removeFromFirestore(groupId: string, uid: string, actorUid: strin
     requireOwner(group, actorUid);
     if (uid === group.ownerId) throw new AppError('O proprietário não pode ser removido do grupo.');
     if (!group.memberIds.includes(uid)) return;
+    if (group.memberIds.length <= MIN_GROUP_MEMBERS) {
+      throw new AppError(`O grupo precisa ter ao menos ${MIN_GROUP_MEMBERS} integrantes.`);
+    }
     transaction.update(groupDoc(groupId), {
       memberIds: group.memberIds.filter((memberId) => memberId !== uid),
       updatedAt: Date.now(),
