@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { Loading } from '../components/Loading';
+import { OfflineBanner } from '../components/OfflineBanner';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { UserListItem } from '../components/UserListItem';
 import { useAuth } from '../hooks/useAuth';
@@ -84,6 +85,7 @@ export function UsersScreen({ navigation, route }: RootScreenProps<'Users'>) {
 
   return (
     <View style={styles.container}>
+      <OfflineBanner />
       <TextInput
         style={styles.search}
         value={searchText}

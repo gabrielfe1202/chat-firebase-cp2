@@ -7,9 +7,8 @@ export class AppError extends Error {
 }
 
 function readCode(error: unknown): string {
-  if (typeof error === 'object' && error !== null && 'code' in error) {
-    const { code } = error as { code: unknown };
-    if (typeof code === 'string') return code;
+  if (typeof error === 'object' && error !== null && 'code' in error && typeof error.code === 'string') {
+    return error.code;
   }
   return '';
 }

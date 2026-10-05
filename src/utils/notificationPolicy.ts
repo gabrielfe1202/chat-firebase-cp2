@@ -1,4 +1,5 @@
-import type { NotificationPolicy } from '../types/notification';
+import type { ChatGroup } from '../types/group';
+import type { NotificationPolicy, NotificationSettings } from '../types/notification';
 
 export const POLICY_LABELS: Record<NotificationPolicy, { title: string; description: string }> = {
   all_group_messages: {
@@ -18,3 +19,18 @@ export const POLICY_LABELS: Record<NotificationPolicy, { title: string; descript
     description: 'Nenhuma mensagem deste grupo gera push.',
   },
 };
+
+/**
+ * Configuração de notificações de uma conversa em grupo. Fica no próprio documento do grupo, e só o
+ * proprietário pode alterá-la; por isso `updatedBy` é sempre o proprietário.
+ */
+export function getNotificationSettings(
+  group: Pick<ChatGroup, 'id' | 'ownerId' | 'notificationPolicy' | 'updatedAt'>,
+): NotificationSettings {
+  return {
+    conversationId: group.id,
+    policy: group.notificationPolicy,
+    updatedBy: group.ownerId,
+    updatedAt: group.updatedAt,
+  };
+}

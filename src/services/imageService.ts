@@ -33,8 +33,7 @@ export async function uploadImage(uri: string, folder: 'profiles' | 'groups'): P
   }
 
   const form = new FormData();
-  // No React Native o arquivo é descrito por { uri, name, type }; o tipo do DOM não cobre esse formato.
-  form.append('file', { uri, name: `${folder}-${Date.now()}.jpg`, type: 'image/jpeg' } as unknown as Blob);
+  form.append('file', { uri, name: `${folder}-${Date.now()}.jpg`, type: 'image/jpeg' });
   form.append('upload_preset', UPLOAD_PRESET);
   form.append('folder', folder);
 

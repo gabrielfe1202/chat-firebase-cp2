@@ -26,7 +26,7 @@ export function RootNavigator() {
     return (
       <View style={styles.pending}>
         <Loading message="Carregando seu perfil..." />
-        <PrimaryButton title="Sair" variant="link" onPress={() => void signOut()} />
+        <PrimaryButton title="Sair" variant="link" onPress={() => signOut().catch(() => undefined)} />
       </View>
     );
   }

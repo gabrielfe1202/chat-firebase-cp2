@@ -1,5 +1,3 @@
-import type { ChatGroup } from './group';
-
 export type ConversationType = 'direct' | 'group';
 
 export type DirectConversation = {
@@ -8,10 +6,6 @@ export type DirectConversation = {
   participants: [string, string];
   createdAt: number;
 };
-
-export type GroupConversation = ChatGroup & { type: 'group' };
-
-export type Conversation = DirectConversation | GroupConversation;
 
 export type MessageTarget =
   | { type: 'conversation' }

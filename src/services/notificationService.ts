@@ -76,7 +76,7 @@ async function fetchPushToken(): Promise<string | null> {
  * Grava o token do aparelho. O caminho preferido é a API, que também retira o mesmo token de outras contas;
  * se ela estiver indisponível, grava direto no Firestore (as regras permitem apenas o próprio usuário).
  */
-export async function saveDeviceToken(uid: string, token: string): Promise<void> {
+async function saveDeviceToken(uid: string, token: string): Promise<void> {
   const deviceId = await getInstallationId();
   const platform = currentPlatform();
 

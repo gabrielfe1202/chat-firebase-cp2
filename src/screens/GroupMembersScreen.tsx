@@ -13,6 +13,7 @@ import type { RootScreenProps } from '../types/navigation';
 import type { PublicProfile } from '../types/user';
 import { pluralize } from '../utils/format';
 import { getAvailableSlots } from '../utils/groupValidation';
+import { POLICY_LABELS, getNotificationSettings } from '../utils/notificationPolicy';
 
 export function GroupMembersScreen({ navigation, route }: RootScreenProps<'GroupMembers'>) {
   const { groupId } = route.params;
@@ -53,6 +54,7 @@ export function GroupMembersScreen({ navigation, route }: RootScreenProps<'Group
   }
 
   const slots = getAvailableSlots(group);
+  const notifications = getNotificationSettings(group);
   const isOwner = group.ownerId === myUid;
   return (
     <FlatList
@@ -67,6 +69,9 @@ export function GroupMembersScreen({ navigation, route }: RootScreenProps<'Group
           <Text style={styles.summary}>
             {group.memberIds.length}/{group.memberLimit} integrantes ·{' '}
             {slots === 0 ? 'sem vagas' : pluralize(slots, 'vaga disponível', 'vagas disponíveis')}
+          </Text>
+          <Text style={styles.summary}>
+            Notificações: {POLICY_LABELS[notifications.policy].title}
           </Text>
           {isOwner ? (
             <PrimaryButton

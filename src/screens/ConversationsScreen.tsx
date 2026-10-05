@@ -4,6 +4,7 @@ import { ConversationItem } from '../components/ConversationItem';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { Loading } from '../components/Loading';
 import { NotificationNotice } from '../components/NotificationNotice';
+import { OfflineBanner } from '../components/OfflineBanner';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useAuth } from '../hooks/useAuth';
 import { useConversations } from '../hooks/useConversations';
@@ -61,6 +62,7 @@ export function ConversationsScreen({ navigation }: RootScreenProps<'Conversatio
 
   return (
     <View style={styles.container}>
+      <OfflineBanner />
       <NotificationNotice state={pushState} onRetry={retryPush} onOpenSettings={openSettings} />
       <View style={styles.messages}>
         <ErrorMessage message={error} />

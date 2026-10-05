@@ -65,11 +65,6 @@ export async function getUserProfile(uid: string): Promise<ChatUser | null> {
   }
 }
 
-export async function getPublicProfile(uid: string): Promise<PublicProfile | null> {
-  const snapshot = await getDoc(publicProfileRef(uid));
-  return snapshot.exists() ? snapshot.data() : null;
-}
-
 /** Observa o perfil em tempo real; devolve a função que remove o listener. */
 export function observeUserProfile(
   uid: string,
