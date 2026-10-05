@@ -59,3 +59,9 @@ firebase-debug.log
 firestore-debug.log
 database-debug.log
 ui-debug.log
+
+# gerados por ferramentas locais (não fazem parte do projeto)
+.agents/
+skills-lock.json
+.claude/skills/
+.claude/launch.json
