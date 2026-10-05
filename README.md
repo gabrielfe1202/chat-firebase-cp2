@@ -7,10 +7,11 @@ O envio das notificações é feito por uma **API própria**, publicada na Verce
 
 ## Integrantes
 
-> ⚠️ **PREENCHER antes da entrega** (nome completo e RM de todos; máximo de cinco).
-
-- RM00000 — Nome Completo 1
-- RM00000 — Nome Completo 2
+- RM555573 — Leonardo Correa de Mello
+- RM556931 — Felipe Soares Xavier
+- RM556630 — Pedro Visconti Guidotte
+- RM555701 — Herbert de Sousa Vilela
+- RM556476 — Gabriel Ferreira Flora
 
 ## Links
 
