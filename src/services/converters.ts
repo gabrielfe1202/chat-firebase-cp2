@@ -2,7 +2,7 @@ import type { DocumentData, FirestoreDataConverter, QueryDocumentSnapshot } from
 import type { DirectConversation } from '../types/chat';
 import type { ChatGroup } from '../types/group';
 import type { DeviceToken, DevicePlatform } from '../types/notification';
-import type { ChatUser } from '../types/user';
+import type { ChatUser, PublicProfile } from '../types/user';
 import { readBoolean, readNumber, readPolicy, readString, readStringArray } from '../utils/parsers';
 
 /** `uid`/`id` vêm do ID do documento e não são gravados no corpo. */
@@ -18,6 +18,18 @@ export const userConverter: FirestoreDataConverter<ChatUser> = {
       birthDate: readString(data.birthDate),
       photoUrl: readString(data.photoUrl),
       createdAt: readNumber(data.createdAt),
+    };
+  },
+};
+
+export const publicProfileConverter: FirestoreDataConverter<PublicProfile> = {
+  toFirestore: ({ uid: _uid, ...data }: PublicProfile): DocumentData => data,
+  fromFirestore: (snapshot: QueryDocumentSnapshot): PublicProfile => {
+    const data = snapshot.data();
+    return {
+      uid: snapshot.id,
+      name: readString(data.name),
+      photoUrl: readString(data.photoUrl),
     };
   },
 };

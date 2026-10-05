@@ -16,6 +16,14 @@ export function getDirectParticipants(uidA: string, uidB: string): [string, stri
   return [first, second];
 }
 
+/** Extrai o uid do outro participante a partir do ID da conversa direta; null se o usuário não faz parte. */
+export function getOtherUidFromDirectId(conversationId: string, myUid: string): string | null {
+  const parts = conversationId.split(SEPARATOR);
+  if (parts.length !== 2) return null;
+  const [first, second] = parts;
+  return getOtherParticipant([first, second], myUid);
+}
+
 /** Retorna o uid do outro participante ou null se o usuário não pertence à conversa. */
 export function getOtherParticipant(
   participants: readonly [string, string],

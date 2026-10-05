@@ -9,7 +9,7 @@ import type { RootScreenProps } from '../types/navigation';
 import { getErrorMessage } from '../utils/authErrors';
 
 /** Versão provisória (Fase 2): mostra o usuário logado e permite sair. A lista real vem na Fase 4. */
-export function ConversationsScreen(_props: RootScreenProps<'Conversations'>) {
+export function ConversationsScreen({ navigation }: RootScreenProps<'Conversations'>) {
   const { profile, signOut } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +28,9 @@ export function ConversationsScreen(_props: RootScreenProps<'Conversations'>) {
       <Text style={styles.email}>{profile?.email}</Text>
       <Text style={styles.empty}>Nenhuma conversa ainda.</Text>
       <ErrorMessage message={error} />
-      <PrimaryButton title="Sair" onPress={handleLogout} />
+      <PrimaryButton title="Nova conversa" onPress={() => navigation.navigate('Users', { mode: 'direct' })} />
+      <PrimaryButton title="Meu perfil" variant="link" onPress={() => profile && navigation.navigate('Profile', { uid: profile.uid })} />
+      <PrimaryButton title="Sair" variant="link" onPress={handleLogout} />
     </View>
   );
 }
