@@ -16,8 +16,8 @@ O envio das notificações é feito por uma **API própria**, publicada na Verce
 
 | Item | Valor |
 |---|---|
-| Repositório | _PREENCHER (URL do GitHub)_ |
-| API publicada | _PREENCHER (ex.: https://seu-projeto.vercel.app)_ |
+| Repositório | <https://github.com/gabrielfe1202/chat-firebase-cp2> (privado: adicione o professor como colaborador ou torne-o público) |
+| API publicada | <https://chat-firebase-api.vercel.app> |
 | Health check | `GET <URL da API>/health` → `{"status":"ok","timestamp":...}` |
 
 ## Tecnologias
