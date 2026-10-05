@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '../components/Avatar';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { FormInput } from '../components/FormInput';
@@ -18,6 +18,7 @@ import type { RootScreenProps } from '../types/navigation';
 import type { NotificationPolicy } from '../types/notification';
 import type { PublicProfile } from '../types/user';
 import { getErrorMessage } from '../utils/authErrors';
+import { confirmAction } from '../utils/dialogs';
 import { pluralize } from '../utils/format';
 import {
   MAX_MEMBER_LIMIT,
@@ -48,7 +49,6 @@ export function GroupFormScreen({ navigation, route }: RootScreenProps<'GroupFor
   const [working, setWorking] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const processedSelection = useRef<string[] | undefined>(undefined);
-
   // Edição: preenche o formulário uma única vez, quando o grupo chega do Firestore.
   useEffect(() => {
     if (!group || initialized) return;
@@ -139,20 +139,19 @@ export function GroupFormScreen({ navigation, route }: RootScreenProps<'GroupFor
         setDraftMemberIds((current) => current.filter((uid) => uid !== member.uid));
         return;
       }
-      Alert.alert('Remover integrante', `Remover ${member.name || UNKNOWN_USER} do grupo?`, [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Remover',
-          style: 'destructive',
-          onPress: () => {
-            setWorking(true);
-            setFormError(null);
-            removeMember(groupId, member.uid, myUid)
-              .catch((e: unknown) => setFormError(getErrorMessage(e)))
-              .finally(() => setWorking(false));
-          },
+      confirmAction({
+        title: 'Remover integrante',
+        message: `Remover ${member.name || UNKNOWN_USER} do grupo?`,
+        confirmLabel: 'Remover',
+        destructive: true,
+        onConfirm: () => {
+          setWorking(true);
+          setFormError(null);
+          removeMember(groupId, member.uid, myUid)
+            .catch((e: unknown) => setFormError(getErrorMessage(e)))
+            .finally(() => setWorking(false));
         },
-      ]);
+      });
     },
     [groupId, isEdit, myUid],
   );

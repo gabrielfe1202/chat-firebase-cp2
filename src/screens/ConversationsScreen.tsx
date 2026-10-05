@@ -1,5 +1,5 @@
 import { useCallback, useLayoutEffect } from 'react';
-import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { ConversationItem } from '../components/ConversationItem';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { Loading } from '../components/Loading';
@@ -15,6 +15,7 @@ import { colors } from '../theme';
 import type { ConversationSummary } from '../types/chat';
 import type { RootScreenProps } from '../types/navigation';
 import { getErrorMessage } from '../utils/authErrors';
+import { showMessage } from '../utils/dialogs';
 
 export function ConversationsScreen({ navigation }: RootScreenProps<'Conversations'>) {
   const { profile, signOut } = useAuth();
@@ -28,7 +29,7 @@ export function ConversationsScreen({ navigation }: RootScreenProps<'Conversatio
     try {
       await signOut();
     } catch (e) {
-      Alert.alert('Não foi possível sair', getErrorMessage(e));
+      showMessage('Não foi possível sair', getErrorMessage(e));
     }
   }, [signOut]);
 

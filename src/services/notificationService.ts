@@ -16,6 +16,9 @@ export const MESSAGES_CHANNEL_ID = 'messages';
 
 const INSTALLATION_ID_KEY = 'chat.installationId';
 
+/** O Expo Notifications não tem implementação no navegador; nessas plataformas o push é simplesmente desligado. */
+const IS_WEB = Platform.OS === 'web';
+
 let activeConversationId: string | null = null;
 
 /** Informa qual conversa está aberta, para não exibir banner de mensagens que o usuário já está vendo. */
@@ -25,6 +28,7 @@ export function setActiveConversationId(conversationId: string | null): void {
 
 /** Define como notificações recebidas com o app aberto são apresentadas. Chamar uma vez na inicialização. */
 export function configureNotificationHandler(): void {
+  if (IS_WEB) return; // notificações push não existem no navegador
   Notifications.setNotificationHandler({
     handleNotification: async (notification) => {
       const payload = parseNotificationPayload(notification.request.content.data);
@@ -96,7 +100,7 @@ async function saveDeviceToken(uid: string, token: string): Promise<void> {
  * Nunca lança: o resultado descreve o que aconteceu para a interface poder orientar o usuário.
  */
 export async function registerForPush(uid: string): Promise<PushRegistrationResult> {
-  if (!Device.isDevice) return { status: 'unavailable', reason: 'not-a-device' };
+  if (IS_WEB || !Device.isDevice) return { status: 'unavailable', reason: 'not-a-device' };
 
   try {
     if (Platform.OS === 'android') {
@@ -124,6 +128,7 @@ export async function registerForPush(uid: string): Promise<PushRegistrationResu
 
 /** Mantém o Firestore atualizado quando o FCM troca o token (Android). Devolve a função que remove o listener. */
 export function observePushTokenChanges(uid: string): () => void {
+  if (IS_WEB) return () => undefined;
   const subscription = Notifications.addPushTokenListener((token) => {
     if (token.type === 'android' && typeof token.data === 'string') {
       void saveDeviceToken(uid, token.data).catch(() => undefined);
@@ -145,6 +150,7 @@ const handledResponseIds = new Set<string>();
  * Cada notificação só é tratada uma vez, mesmo que o listener seja recriado.
  */
 export function observeNotificationTaps(onOpen: (payload: NotificationPayload) => void): () => void {
+  if (IS_WEB) return () => undefined;
   const handle = (response: Notifications.NotificationResponse): void => {
     const id = response.notification.request.identifier;
     if (handledResponseIds.has(id)) return;
