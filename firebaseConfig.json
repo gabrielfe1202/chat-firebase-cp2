@@ -1,0 +1,9 @@
+{
+  "apiKey": "PLACEHOLDER",
+  "authDomain": "PLACEHOLDER.firebaseapp.com",
+  "databaseURL": "https://PLACEHOLDER-default-rtdb.firebaseio.com",
+  "projectId": "PLACEHOLDER",
+  "storageBucket": "PLACEHOLDER.firebasestorage.app",
+  "messagingSenderId": "PLACEHOLDER",
+  "appId": "PLACEHOLDER"
+}

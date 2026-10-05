@@ -39,3 +39,17 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# env e segredos
+.env
+server/.env
+serviceAccountKey.json
+firebaseAdminCredentials.json
+*serviceAccount*.json
+.vercel/
+
+# arquivos nativos do Firebase (gerados no console)
+google-services.json
+GoogleService-Info.plist
+
+server/node_modules/

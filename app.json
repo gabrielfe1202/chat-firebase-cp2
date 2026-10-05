@@ -1,15 +1,20 @@
 {
   "expo": {
-    "name": "_tmpapp",
-    "slug": "_tmpapp",
+    "name": "Chat Firebase",
+    "slug": "chat-firebase",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "scheme": "chatfirebase",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.chatfirebase",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
+      "package": "com.example.chatfirebase",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -18,8 +23,11 @@
       },
       "predictiveBackGestureEnabled": false
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "web": { "favicon": "./assets/favicon.png" },
+    "plugins": [
+      "expo-build-properties",
+      "expo-notifications",
+      ["expo-image-picker", { "photosPermission": "Permite escolher a foto de perfil e do grupo." }]
+    ]
   }
 }
