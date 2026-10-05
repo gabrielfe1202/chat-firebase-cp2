@@ -53,3 +53,9 @@ google-services.json
 GoogleService-Info.plist
 
 server/node_modules/
+
+# logs da Firebase CLI
+firebase-debug.log
+firestore-debug.log
+database-debug.log
+ui-debug.log

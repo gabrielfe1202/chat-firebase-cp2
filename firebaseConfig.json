@@ -1,9 +1,9 @@
 {
-  "apiKey": "PLACEHOLDER",
-  "authDomain": "PLACEHOLDER.firebaseapp.com",
-  "databaseURL": "https://PLACEHOLDER-default-rtdb.firebaseio.com",
-  "projectId": "PLACEHOLDER",
-  "storageBucket": "PLACEHOLDER.firebasestorage.app",
-  "messagingSenderId": "PLACEHOLDER",
-  "appId": "PLACEHOLDER"
+  "apiKey": "AIzaSyCo9WfXSeUf24eCZ9lPK8uhOcrlFCr0Oa0",
+  "authDomain": "chat-firebase-cp2-35028.firebaseapp.com",
+  "databaseURL": "https://chat-firebase-cp2-35028-default-rtdb.firebaseio.com",
+  "projectId": "chat-firebase-cp2-35028",
+  "storageBucket": "chat-firebase-cp2-35028.firebasestorage.app",
+  "messagingSenderId": "567329617663",
+  "appId": "1:567329617663:web:8f371dbf3edb3cb65fbeca"
 }
