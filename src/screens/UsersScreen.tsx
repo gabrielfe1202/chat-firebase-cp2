@@ -14,13 +14,13 @@ import { getErrorMessage } from '../utils/authErrors';
 import { filterUsers } from '../utils/userFilter';
 
 export function UsersScreen({ navigation, route }: RootScreenProps<'Users'>) {
-  const { mode, groupId } = route.params;
+  const { mode, groupId, initialSelectedIds, lockedIds, maxSelectable } = route.params;
   const { profile } = useAuth();
   const myUid = profile?.uid ?? '';
   const { users, loading, error } = useUsers();
 
   const [searchText, setSearchText] = useState('');
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds ?? []);
   const [opening, setOpening] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -33,9 +33,17 @@ export function UsersScreen({ navigation, route }: RootScreenProps<'Users'>) {
       setActionError(null);
 
       if (isSelecting) {
-        setSelectedIds((current) =>
-          current.includes(user.uid) ? current.filter((id) => id !== user.uid) : [...current, user.uid],
-        );
+        if (lockedIds?.includes(user.uid)) return;
+        const alreadySelected = selectedIds.includes(user.uid);
+        if (!alreadySelected && maxSelectable !== undefined && selectedIds.length >= maxSelectable) {
+          setActionError(
+            maxSelectable === 0
+              ? 'O grupo não tem vagas disponíveis.'
+              : `O grupo só tem vaga para mais ${maxSelectable} integrante(s).`,
+          );
+          return;
+        }
+        setSelectedIds(alreadySelected ? selectedIds.filter((id) => id !== user.uid) : [...selectedIds, user.uid]);
         return;
       }
 
@@ -48,23 +56,28 @@ export function UsersScreen({ navigation, route }: RootScreenProps<'Users'>) {
         setOpening(false);
       }
     },
-    [isSelecting, myUid, navigation],
+    [isSelecting, lockedIds, maxSelectable, myUid, navigation, selectedIds],
   );
 
+  // Volta ao formulário já aberto, entregando a seleção como parâmetro (sem empilhar outra cópia).
   const handleConfirmSelection = useCallback(() => {
-    navigation.navigate('GroupForm', { groupId, selectedMemberIds: selectedIds });
+    navigation.popTo('GroupForm', { groupId, selectedMemberIds: selectedIds }, { merge: true });
   }, [groupId, navigation, selectedIds]);
 
   const renderItem = useCallback(
-    ({ item }: { item: PublicProfile }) => (
-      <UserListItem
-        user={item}
-        onPress={handlePress}
-        selected={isSelecting ? selectedIds.includes(item.uid) : undefined}
-        disabled={opening}
-      />
-    ),
-    [handlePress, isSelecting, selectedIds, opening],
+    ({ item }: { item: PublicProfile }) => {
+      const locked = lockedIds?.includes(item.uid) ?? false;
+      return (
+        <UserListItem
+          user={item}
+          onPress={handlePress}
+          selected={isSelecting ? locked || selectedIds.includes(item.uid) : undefined}
+          disabled={opening || locked}
+          subtitle={locked ? 'Já é integrante' : undefined}
+        />
+      );
+    },
+    [handlePress, isSelecting, lockedIds, selectedIds, opening],
   );
 
   if (loading) return <Loading message="Carregando usuários..." />;
@@ -97,11 +110,7 @@ export function UsersScreen({ navigation, route }: RootScreenProps<'Users'>) {
       />
       {isSelecting ? (
         <View style={styles.footer}>
-          <PrimaryButton
-            title={`Confirmar (${selectedIds.length})`}
-            onPress={handleConfirmSelection}
-            disabled={selectedIds.length === 0}
-          />
+          <PrimaryButton title={`Confirmar (${selectedIds.length})`} onPress={handleConfirmSelection} />
         </View>
       ) : null}
     </View>

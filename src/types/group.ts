@@ -12,6 +12,11 @@ export type ChatGroup = {
   updatedAt: number;
 };
 
+/** Campos que o proprietário pode alterar depois da criação; cada um é opcional. */
+export type GroupSettingsUpdate = Partial<
+  Pick<ChatGroup, 'name' | 'photoUrl' | 'memberLimit' | 'notificationPolicy'>
+>;
+
 export type CreateGroupInput = {
   name: string;
   photoUri: string | null;

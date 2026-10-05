@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Avatar } from '../components/Avatar';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { Loading } from '../components/Loading';
+import { PrimaryButton } from '../components/PrimaryButton';
 import { UserListItem } from '../components/UserListItem';
 import { useAuth } from '../hooks/useAuth';
 import { useConversation } from '../hooks/useConversation';
@@ -52,6 +53,7 @@ export function GroupMembersScreen({ navigation, route }: RootScreenProps<'Group
   }
 
   const slots = getAvailableSlots(group);
+  const isOwner = group.ownerId === myUid;
   return (
     <FlatList
       style={styles.list}
@@ -66,6 +68,12 @@ export function GroupMembersScreen({ navigation, route }: RootScreenProps<'Group
             {group.memberIds.length}/{group.memberLimit} integrantes ·{' '}
             {slots === 0 ? 'sem vagas' : pluralize(slots, 'vaga disponível', 'vagas disponíveis')}
           </Text>
+          {isOwner ? (
+            <PrimaryButton
+              title="Gerenciar grupo"
+              onPress={() => navigation.navigate('GroupForm', { groupId: group.id })}
+            />
+          ) : null}
         </View>
       }
     />

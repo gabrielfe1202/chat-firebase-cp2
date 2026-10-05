@@ -6,6 +6,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { useAuth } from '../hooks/useAuth';
 import { ChatScreen } from '../screens/ChatScreen';
 import { ConversationsScreen } from '../screens/ConversationsScreen';
+import { GroupFormScreen } from '../screens/GroupFormScreen';
 import { GroupMembersScreen } from '../screens/GroupMembersScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
@@ -38,6 +39,11 @@ export function RootNavigator() {
           <Stack.Screen name="Users" component={UsersScreen} options={{ title: 'Usuários' }} />
           <Stack.Screen name="Chat" component={ChatScreen} />
           <Stack.Screen name="GroupMembers" component={GroupMembersScreen} options={{ title: 'Integrantes' }} />
+          <Stack.Screen
+            name="GroupForm"
+            component={GroupFormScreen}
+            options={({ route }) => ({ title: route.params.groupId ? 'Editar grupo' : 'Novo grupo' })}
+          />
           <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil' }} />
         </Stack.Navigator>
       ) : (

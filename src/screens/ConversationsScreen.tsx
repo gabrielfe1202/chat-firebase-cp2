@@ -70,6 +70,7 @@ export function ConversationsScreen({ navigation }: RootScreenProps<'Conversatio
       />
       <View style={styles.footer}>
         <PrimaryButton title="Nova conversa" onPress={() => navigation.navigate('Users', { mode: 'direct' })} />
+        <PrimaryButton title="Novo grupo" variant="link" onPress={() => navigation.navigate('GroupForm', {})} />
       </View>
     </View>
   );
