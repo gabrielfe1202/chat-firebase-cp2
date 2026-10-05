@@ -6,6 +6,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { useAuth } from '../hooks/useAuth';
 import { ChatScreen } from '../screens/ChatScreen';
 import { ConversationsScreen } from '../screens/ConversationsScreen';
+import { GroupMembersScreen } from '../screens/GroupMembersScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
@@ -36,6 +37,7 @@ export function RootNavigator() {
           <Stack.Screen name="Conversations" component={ConversationsScreen} options={{ title: 'Conversas' }} />
           <Stack.Screen name="Users" component={UsersScreen} options={{ title: 'Usuários' }} />
           <Stack.Screen name="Chat" component={ChatScreen} />
+          <Stack.Screen name="GroupMembers" component={GroupMembersScreen} options={{ title: 'Integrantes' }} />
           <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil' }} />
         </Stack.Navigator>
       ) : (

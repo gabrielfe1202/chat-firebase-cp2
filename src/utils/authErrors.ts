@@ -27,6 +27,8 @@ const MESSAGES: Record<string, string> = {
   'auth/requires-recent-login': 'Sua sessão expirou. Faça login novamente.',
   'auth/user-token-expired': 'Sua sessão expirou. Faça login novamente.',
   'permission-denied': 'Você não tem permissão para realizar esta ação.',
+  PERMISSION_DENIED: 'Você não tem permissão para realizar esta ação.',
+  NETWORK_ERROR: 'Sem conexão com a internet. Verifique sua rede.',
   unavailable: 'Serviço indisponível. Verifique sua conexão e tente novamente.',
 };
 

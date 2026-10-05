@@ -38,3 +38,13 @@ export type SendMessageInput = {
 };
 
 export const MAX_MESSAGE_LENGTH = 1000;
+
+/** Item da lista de conversas (individuais e grupos unificados). */
+export type ConversationSummary = {
+  id: string;
+  type: ConversationType;
+  title: string;
+  subtitle: string;
+  photoUrl: string;
+  createdAt: number;
+};

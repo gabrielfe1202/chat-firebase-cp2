@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observePublicProfiles } from '../services/userService';
 import type { PublicProfile } from '../types/user';
 import { getErrorMessage } from '../utils/authErrors';
@@ -9,8 +9,13 @@ type UsersState = {
   error: string | null;
 };
 
+type UsersResult = UsersState & {
+  /** Índice por uid, para resolver nomes e fotos (autores de mensagens, integrantes). */
+  byUid: ReadonlyMap<string, PublicProfile>;
+};
+
 /** Lista os usuários cadastrados em tempo real; o listener é removido ao desmontar a tela. */
-export function useUsers(): UsersState {
+export function useUsers(): UsersResult {
   const [state, setState] = useState<UsersState>({ users: [], loading: true, error: null });
 
   useEffect(() => {
@@ -20,5 +25,7 @@ export function useUsers(): UsersState {
     );
   }, []);
 
-  return state;
+  const byUid = useMemo(() => new Map(state.users.map((user) => [user.uid, user])), [state.users]);
+
+  return { ...state, byUid };
 }

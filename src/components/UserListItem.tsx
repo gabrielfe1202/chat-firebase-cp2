@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme';
 import type { PublicProfile } from '../types/user';
 import { Avatar } from './Avatar';
@@ -10,9 +10,11 @@ type Props = {
   /** Quando definido, exibe o indicador de seleção múltipla. */
   selected?: boolean;
   disabled?: boolean;
+  /** Texto secundário, ex.: "Proprietário". */
+  subtitle?: string;
 };
 
-function UserListItemComponent({ user, onPress, selected, disabled = false }: Props) {
+function UserListItemComponent({ user, onPress, selected, disabled = false, subtitle }: Props) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -22,9 +24,12 @@ function UserListItemComponent({ user, onPress, selected, disabled = false }: Pr
       style={({ pressed }) => [styles.row, pressed ? styles.pressed : null, disabled ? styles.disabled : null]}
     >
       <Avatar uri={user.photoUrl} name={user.name} size={44} />
-      <Text style={styles.name} numberOfLines={1}>
-        {user.name || 'Usuário sem nome'}
-      </Text>
+      <View style={styles.texts}>
+        <Text style={styles.name} numberOfLines={1}>
+          {user.name || 'Usuário sem nome'}
+        </Text>
+        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+      </View>
       {selected !== undefined ? (
         <Text style={[styles.check, selected ? styles.checkOn : null]}>{selected ? '✓' : ''}</Text>
       ) : null}
@@ -38,7 +43,9 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 10 },
   pressed: { backgroundColor: colors.surface },
   disabled: { opacity: 0.5 },
-  name: { flex: 1, fontSize: 16, color: colors.text },
+  texts: { flex: 1 },
+  name: { fontSize: 16, color: colors.text },
+  subtitle: { fontSize: 12, color: colors.textMuted },
   check: {
     width: 24,
     height: 24,
