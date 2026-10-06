@@ -86,6 +86,17 @@ O envio das notificações é feito por uma **API própria**, publicada na Verce
         └── services/           # firebaseAdmin, recipientResolver, notificationProcessor, notificationSender, firebasePorts
 ```
 
+## APK para instalação
+
+O repositório inclui o [`app.apk`](app.apk), um build de **preview** gerado no EAS (perfil `preview`), que já traz
+as variáveis de produção (URL da API e Cloudinary) e o Firebase configurado. Para testar sem rodar o código:
+
+1. Baixe o `app.apk` no celular Android e abra o arquivo.
+2. Se o Android pedir, permita a instalação de apps de fontes desconhecidas para o navegador ou gerenciador de arquivos.
+3. Abra o app **Chat Firebase**, crie uma conta e aceite a permissão de notificações.
+
+O APK é só para Android. Para o push, o aparelho precisa ser físico e ter acesso à internet.
+
 ## Como executar o aplicativo
 
 Pré-requisitos: Node.js 20+, uma conta Expo (para o build) e um projeto Firebase (abaixo).
@@ -301,8 +312,11 @@ Capturas do aplicativo em execução em um aparelho físico (arquivos em [`print
 
 ## Evidência de notificação recebida
 
-> ⚠️ **PREENCHER:** print ou vídeo de um push recebido em aparelho físico (app em segundo plano ou fechado) e do
-> toque abrindo a conversa correta, para cada política, se possível.
+Push recebido em um aparelho Android físico, enviado pela API (Vercel) através do FCM quando outro usuário mandou uma
+mensagem. O título traz o nome do remetente e o corpo é genérico ("Nova mensagem"): o texto da mensagem não é
+exposto na notificação.
+
+<img src="prints/notificacao.jpeg" alt="Notificação push recebida no Android" width="260">
 
 ## Funcionalidades
 
