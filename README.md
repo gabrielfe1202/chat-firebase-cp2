@@ -285,18 +285,19 @@ a ignorância de destinatários enviados pelo cliente. Usam portas falsas, sem a
 
 ## Telas
 
-> ⚠️ **PREENCHER:** adicione os prints em `docs/prints/` e referencie-os abaixo.
+Capturas do aplicativo em execução em um aparelho físico (arquivos em [`prints/`](prints/)).
 
 | Tela | Print |
 |---|---|
-| Login e cadastro | _PREENCHER_ |
-| Conversas | _PREENCHER_ |
-| Usuários (busca) | _PREENCHER_ |
-| Criação/edição de grupo | _PREENCHER_ |
-| Chat individual | _PREENCHER_ |
-| Chat em grupo (menção) | _PREENCHER_ |
-| Integrantes do grupo | _PREENCHER_ |
-| Perfil | _PREENCHER_ |
+| Login | <img src="prints/login.jpeg" alt="Tela de login" width="220"> |
+| Cadastro (nome, e-mail, celular, nascimento, senha e foto) | <img src="prints/cadastro.jpeg" alt="Tela de cadastro" width="220"> |
+| Conversas (individuais e grupos) | <img src="prints/conversas.jpeg" alt="Lista de conversas" width="220"> |
+| Usuários (com busca) | <img src="prints/usuarios.jpeg" alt="Lista de usuários" width="220"> |
+| Criação de grupo (limite, vagas e política de notificações) | <img src="prints/criacao-de-grupo.jpeg" alt="Criação de grupo" width="220"> |
+| Chat individual | <img src="prints/chat-individual.jpeg" alt="Chat individual" width="220"> |
+| Chat em grupo (mensagem geral e direcionada a um integrante) | <img src="prints/chat-em-grupo.jpeg" alt="Chat em grupo" width="220"> |
+| Integrantes do grupo | <img src="prints/integrantes-do-grupo.jpeg" alt="Integrantes do grupo" width="220"> |
+| Perfil | <img src="prints/perfil.jpeg" alt="Perfil do usuário" width="220"> |
 
 ## Evidência de notificação recebida
 
