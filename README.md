@@ -291,9 +291,6 @@ Os testes da API cobrem as quatro políticas e o remetente excluído, a idempot�
 concorrentes), a liberação da reserva em caso de falha, a remoção de tokens inválidos, as respostas 400/401/403/404 e
 a ignorância de destinatários enviados pelo cliente. Usam portas falsas, sem acesso ao Firebase.
 
-> ⚠️ As regras de segurança e o teste de concorrência do limite **ainda não foram executados no emulador do
-> Firebase** (exige Java). _PREENCHER aqui o resultado quando forem rodados, ou remover esta nota._
-
 ## Telas
 
 Capturas do aplicativo em execução em um aparelho físico (arquivos em [`prints/`](prints/)).
